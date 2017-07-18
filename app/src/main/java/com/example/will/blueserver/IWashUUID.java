@@ -9,8 +9,8 @@ import java.util.UUID;
 
 public class IWashUUID {
 
-    public static final UUID ser1Uuid = UUID.fromString("00001800-0000-1000-8000-00805f9b34fb");
-    public static final UUID ser1Char1Uuid = UUID.fromString("00002a00-0000-1000-8000-00805f9b34fb");
+    public static final UUID ser1Uuid = UUID.fromString("0000500c-0000-1000-8000-00805f9b34fb");
+    public static final UUID ser1Char1Uuid = UUID.fromString("0000500d-0000-1000-8000-00805f9b34fb");
     public static final UUID ser1Char2Uuid = UUID.fromString("00002a01-0000-1000-8000-00805f9b34fb");
 
     public static final UUID ser2Uuid = UUID.fromString("00001801-0000-1000-8000-00805f9b34fb");

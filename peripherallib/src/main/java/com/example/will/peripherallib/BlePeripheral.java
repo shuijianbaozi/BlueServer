@@ -15,11 +15,13 @@ import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.will.peripherallib.common.ContextTool;
 import com.example.will.peripherallib.common.LocalBluetoothCtrl;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -29,6 +31,7 @@ import java.util.UUID;
 
 public class BlePeripheral {
 
+    private static final String TAG = "BlePeripheral";
     private LocalBluetoothCtrl localBluetoothCtrl = LocalBluetoothCtrl.getInstance();
 
     private static class BlePeripheralHolder {
@@ -39,10 +42,11 @@ public class BlePeripheral {
         return BlePeripheralHolder.INSTANCE;
     }
 
-    private BlePeripheral (){
-        if (localBluetoothCtrl.isBLESupported()){
+    private BlePeripheral() {
+        if (localBluetoothCtrl.isBLESupported()) {
             BluetoothManager bluetoothManager = localBluetoothCtrl.getBluetoothManager();
             BluetoothAdapter bluetoothAdapter = localBluetoothCtrl.getBluetoothAdapter();
+            bluetoothAdapter.setName("BLEAdvName");
             bluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
             bluetoothGattServer = bluetoothManager.openGattServer(context, bluetoothGattServerCallback);
         }
@@ -54,31 +58,40 @@ public class BlePeripheral {
     private BluetoothDevice connectDevice = null;
     private BlePeripheralCallback blePeripheralCallback = new BlePeripheralCallback() {
         @Override
-        public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {}
+        public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
+        }
 
         @Override
-        public void onServiceAdded(int status, BluetoothGattService service) {}
+        public void onServiceAdded(int status, BluetoothGattService service) {
+        }
 
         @Override
-        public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {}
+        public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
+        }
 
         @Override
-        public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {}
+        public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
+        }
 
         @Override
-        public void onDescriptorReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattDescriptor descriptor) {}
+        public void onDescriptorReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattDescriptor descriptor) {
+        }
 
         @Override
-        public void onDescriptorWriteRequest(BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {}
+        public void onDescriptorWriteRequest(BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
+        }
 
         @Override
-        public void onExecuteWrite(BluetoothDevice device, int requestId, boolean execute) {}
+        public void onExecuteWrite(BluetoothDevice device, int requestId, boolean execute) {
+        }
 
         @Override
-        public void onNotificationSent(BluetoothDevice device, int status) {}
+        public void onNotificationSent(BluetoothDevice device, int status) {
+        }
 
         @Override
-        public void onMtuChanged(BluetoothDevice device, int mtu) {}
+        public void onMtuChanged(BluetoothDevice device, int mtu) {
+        }
     };
 
     public BlePeripheralCallback getBlePeripheralCallback() {
@@ -96,26 +109,26 @@ public class BlePeripheral {
     private BluetoothGattServerCallback bluetoothGattServerCallback = new BluetoothGattServerCallback() {
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
-            if (newState == BluetoothProfile.STATE_CONNECTED){
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
                 connectDevice = device;
-            }else{
+            } else {
                 connectDevice = null;
             }
-            blePeripheralCallback.onConnectionStateChange(device,status,newState);
+            blePeripheralCallback.onConnectionStateChange(device, status, newState);
         }
 
         @Override
         public void onServiceAdded(int status, BluetoothGattService service) {
-            blePeripheralCallback.onServiceAdded(status,service);
+            blePeripheralCallback.onServiceAdded(status, service);
         }
 
-        @Override
+        @Override //central主动读characteristic
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
             blePeripheralCallback.onCharacteristicReadRequest(device, requestId, offset, characteristic);
             bluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, null);
         }
 
-        @Override
+        @Override   //可能是central主动写
         public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
             blePeripheralCallback.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
             bluetoothGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, null);
@@ -150,8 +163,8 @@ public class BlePeripheral {
     };
 
     public BluetoothLeAdvertiser getBluetoothLeAdvertiser() {
-        if (bluetoothLeAdvertiser == null){
-            if (localBluetoothCtrl.isBLESupported()){
+        if (bluetoothLeAdvertiser == null) {
+            if (localBluetoothCtrl.isBLESupported()) {
                 BluetoothAdapter bluetoothAdapter = localBluetoothCtrl.getBluetoothAdapter();
                 bluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
             }
@@ -160,7 +173,7 @@ public class BlePeripheral {
     }
 
     public BluetoothGattServer getBluetoothGattServer() {
-        if (bluetoothGattServer == null){
+        if (bluetoothGattServer == null) {
             if (localBluetoothCtrl.isBLESupported()) {
                 BluetoothManager bluetoothManager = localBluetoothCtrl.getBluetoothManager();
                 bluetoothGattServer = bluetoothManager.openGattServer(context, bluetoothGattServerCallback);
@@ -169,35 +182,48 @@ public class BlePeripheral {
         return bluetoothGattServer;
     }
 
-    public void startAdvertising(AdvertiseSettings settings, AdvertiseData advertiseData, AdvertiseCallback callback){
+    public void startAdvertising(AdvertiseSettings settings, AdvertiseData advertiseData, AdvertiseCallback callback) {
         bluetoothLeAdvertiser = getBluetoothLeAdvertiser();
-        if (bluetoothLeAdvertiser != null && settings != null && advertiseData != null && callback != null){
+        if (bluetoothLeAdvertiser != null && settings != null && advertiseData != null && callback != null) {
             getBluetoothLeAdvertiser().startAdvertising(settings, advertiseData, callback);
         }
     }
 
-    public void startAdvertising(AdvertiseSettings settings, AdvertiseData advertiseData, AdvertiseData scanResponse, AdvertiseCallback callback){
+    public void startAdvertising(AdvertiseSettings settings, AdvertiseData advertiseData, AdvertiseData scanResponse, AdvertiseCallback callback) {
         bluetoothLeAdvertiser = getBluetoothLeAdvertiser();
-        if (bluetoothLeAdvertiser != null && settings != null && advertiseData != null && scanResponse != null && callback != null){
+        if (bluetoothLeAdvertiser != null && settings != null && advertiseData != null && scanResponse != null && callback != null) {
             getBluetoothLeAdvertiser().startAdvertising(settings, advertiseData, scanResponse, callback);
         }
     }
-
-    public void stopAdvertising(AdvertiseCallback callback){
+    //关闭ble 从端发送的广播
+    public void stopAdvertising(AdvertiseCallback callback) {
         bluetoothLeAdvertiser = getBluetoothLeAdvertiser();
-        if (bluetoothLeAdvertiser != null && callback != null){
+        if (bluetoothLeAdvertiser != null && callback != null) {
             getBluetoothLeAdvertiser().stopAdvertising(callback);
+            cutAllLink();
         }
     }
 
-    public BluetoothGattService addServices(ServiceConfig serviceConfig, CharacteristicConfig[] characteristicConfigs){
-        if (serviceConfig == null){
+    //断开所连接的ble设备 关闭广播并不意味着断开ble连接
+    public void cutAllLink() {
+        bluetoothLeAdvertiser = getBluetoothLeAdvertiser();
+        List<BluetoothDevice> connectedDevices = localBluetoothCtrl.getBluetoothManager().getConnectedDevices(BluetoothProfile.GATT);
+        for (int i = 0; i < connectedDevices.size(); i++) {
+            BluetoothDevice bluetoothDevice = connectedDevices.get(i);
+            Log.i(TAG, "cancelConnection: bluetoothdevice is " + bluetoothDevice.getName() + "\t" + bluetoothDevice.getAddress());
+            bluetoothGattServer.cancelConnection(bluetoothDevice);
+        }
+        connectDevice=null;//连接到设备归零 mainactivity 通过他是否为null来获得当前的设备是否还在
+    }
+
+    public BluetoothGattService addServices(ServiceConfig serviceConfig, CharacteristicConfig[] characteristicConfigs) {
+        if (serviceConfig == null) {
             return null;
         }
-        BluetoothGattService service = new BluetoothGattService(serviceConfig.getUuid(),serviceConfig.getServiceType());
-        if (characteristicConfigs != null){
-            for (CharacteristicConfig characteristicConfig : characteristicConfigs){
-                BluetoothGattCharacteristic characteristic = new BluetoothGattCharacteristic(characteristicConfig.getUuid(),characteristicConfig.getProperties(),characteristicConfig.getPermissions());
+        BluetoothGattService service = new BluetoothGattService(serviceConfig.getUuid(), serviceConfig.getServiceType());
+        if (characteristicConfigs != null) {
+            for (CharacteristicConfig characteristicConfig : characteristicConfigs) {
+                BluetoothGattCharacteristic characteristic = new BluetoothGattCharacteristic(characteristicConfig.getUuid(), characteristicConfig.getProperties(), characteristicConfig.getPermissions());
                 service.addCharacteristic(characteristic);
             }
         }
@@ -205,15 +231,15 @@ public class BlePeripheral {
         return service;
     }
 
-    public boolean sendDataToRemoteDevice(UUID serviceUuid, UUID characteristicUuid, BluetoothDevice bluetoothDevice, byte[] data){
+    public boolean sendDataToRemoteDevice(UUID serviceUuid, UUID characteristicUuid, BluetoothDevice bluetoothDevice, byte[] data) {
         bluetoothGattServer = getBluetoothGattServer();
-        if (bluetoothGattServer != null){
-            if (bluetoothDevice != null){
-                if (localBluetoothCtrl.getBluetoothManager().getConnectionState(bluetoothDevice,BluetoothProfile.GATT_SERVER) == BluetoothProfile.STATE_CONNECTED){
+        if (bluetoothGattServer != null) {
+            if (bluetoothDevice != null) {
+                if (localBluetoothCtrl.getBluetoothManager().getConnectionState(bluetoothDevice, BluetoothProfile.GATT_SERVER) == BluetoothProfile.STATE_CONNECTED) {
                     BluetoothGattService service = bluetoothGattServer.getService(serviceUuid);
-                    if (service != null){
+                    if (service != null) {
                         BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUuid);
-                        if (characteristic != null){
+                        if (characteristic != null) {
                             characteristic.setValue(data);
                             return bluetoothGattServer.notifyCharacteristicChanged(bluetoothDevice, characteristic, false);
                         }
